@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Diya Karmakar — Data Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #060a0f;
+    --bg2: #0b1017;
+    --bg3: #0f1720;
+    --surface: #111a24;
+    --border: #1e2d3d;
+    --border2: #243545;
+    --green: #00ff88;
+    --green2: #00cc6a;
+    --green-dim: rgba(0,255,136,0.08);
+    --green-glow: rgba(0,255,136,0.15);
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.07);
+    --amber: #ffb300;
+    --red: #ff4757;
+    --text: #c9d8e8;
+    --text2: #7a96b0;
+    --text3: #4a6070;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 56px;
+    background: rgba(6,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-logo span { color: var(--text3); }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--green); }
+
+  .nav-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 80px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%; left: -10%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    bottom: 10%; right: -5%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,212,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 900px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-prompt {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-prompt::before {
+    content: '>';
+    color: var(--green);
+    font-size: 14px;
+  }
+
+  .hero-name {
+    font-family: var(--display);
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .hero-name .accent { color: var(--green); }
+
+  .hero-title {
+    font-size: 13px;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-title::before {
+    content: '';
+    display: block;
+    width: 40px; height: 1px;
+    background: var(--cyan);
+    opacity: 0.5;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+  }
+
+  .hero-desc strong { color: var(--text); font-weight: 500; }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--green);
+    box-shadow: 0 0 20px var(--green-glow);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border-color: var(--border2);
+    color: var(--text2);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hero-meta-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .hero-meta-value {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .hero-meta-value .green { color: var(--green); }
+
+  /* ── SECTION ── */
+  section {
+    padding: 100px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 64px;
+  }
+
+  .section-num {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.2em;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border2), transparent);
+  }
+
+  /* ── EXPERIENCE ── */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--green), var(--border), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 56px;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.5s forwards;
+  }
+
+  .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+  .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+  .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -37px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--green);
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .timeline-dot.dim {
+    border-color: var(--border2);
+    box-shadow: none;
+  }
+
+  .timeline-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .timeline-date {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    background: var(--green-dim);
+    padding: 2px 8px;
+    border: 1px solid rgba(0,255,136,0.15);
+  }
+
+  .timeline-company {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+  }
+
+  .timeline-role {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .timeline-desc {
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    letter-spacing: 0.05em;
+  }
+
+  .tag.cyan {
+    background: var(--cyan-dim);
+    border-color: rgba(0,212,255,0.2);
+    color: var(--cyan);
+  }
+
+  /* ── SKILLS ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--green), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .skill-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-2px);
+  }
+
+  .skill-card:hover::before { opacity: 1; }
+
+  .skill-card-icon {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .skill-card-title {
+    font-size: 12px;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+  }
+
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .skill-pill {
+    font-size: 11px;
+    padding: 4px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+
+  .skill-pill:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* ── AWARDS ── */
+  .awards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .award-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .award-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--green), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .award-card:hover {
+    border-color: rgba(0,255,136,0.2);
+    background: rgba(0,255,136,0.02);
+  }
+
+  .award-card:hover::after { opacity: 1; }
+
+  .award-year {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .award-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .award-title {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .award-org {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* ── CONTACT ── */
+  #contact {
+    border-top: 1px solid var(--border);
+  }
+
+  .contact-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .contact-text h2 {
+    font-family: var(--display);
+    font-size: 40px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .contact-text h2 .green { color: var(--green); }
+
+  .contact-text p {
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    group: true;
+  }
+
+  .contact-link:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .contact-link-icon {
+    width: 20px;
+    text-align: center;
+    color: var(--green);
+    font-size: 16px;
+  }
+
+  .contact-link-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* ── TERMINAL BLOCK ── */
+  .terminal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .terminal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .terminal-dot.r { background: #ff5f57; }
+  .terminal-dot.y { background: #febc2e; }
+  .terminal-dot.g { background: #28c840; }
+
+  .terminal-title {
+    font-size: 11px;
+    color: var(--text3);
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .terminal-body {
+    padding: 20px 24px;
+    font-size: 12px;
+    line-height: 2;
+  }
+
+  .t-prompt { color: var(--green); }
+  .t-cmd { color: var(--text); }
+  .t-out { color: var(--text2); }
+  .t-cyan { color: var(--cyan); }
+  .t-amber { color: var(--amber); }
+  .t-dim { color: var(--text3); }
+
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--green);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text3);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  footer span { color: var(--green); }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    section { padding: 80px 20px; }
+    #hero { padding: 80px 20px 40px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+    footer { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>~/</span>diya-karmakar</div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#experience">experience</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#awards">awards</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    available for ML · Gen AI · Data Eng roles
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="max-width:100%; padding-top:80px;">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-inner">
+    <div class="hero-prompt">whoami // data engineer · ml · gen ai · agentic ai</div>
+    <h1 class="hero-name">Diya<br><span class="accent">Karmakar</span></h1>
+    <div class="hero-title">Data Engineer · ML · Gen AI · Agentic AI</div>
+    <p class="hero-desc">
+      Data Engineer at Lowe's building <strong>distributed systems and data pipelines</strong> at scale.
+      Exploring <strong>ML, Generative AI, and Agentic AI</strong> — RAG, LLMs, MCP orchestration, and intelligent data infrastructure.<br><br>
+      ECE · NIT Silchar · SIH 2023 Winner · McKinsey Next Gen Leader APAC
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary">get_in_touch()</a>
+      <a href="https://github.com/diyakarmakar779" target="_blank" class="btn btn-outline">$ github</a>
+      <a href="https://linkedin.com/in/diya-karmakar" target="_blank" class="btn btn-outline">$ linkedin</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">location</span>
+        <span class="hero-meta-value">Bengaluru, India</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">status</span>
+        <span class="hero-meta-value"><span class="green">● active</span> @ Lowe's India</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">focus</span>
+        <span class="hero-meta-value">Data Eng · ML · Gen AI · Agentic AI</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">education</span>
+        <span class="hero-meta-value">B.Tech ECE · NIT Silchar · 8.4 GPA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header fade-up">
+    <span class="section-num">01.</span>
+    <h2 class="section-title">about</h2>
+    <div class="section-line"></div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items:start;" class="fade-up">
+    <div>
+      <p style="color:var(--text2); font-size:13px; line-height:2; margin-bottom:20px;">
+        I'm a Data Engineer at <span style="color:var(--text)">Lowe's India</span>, designing distributed backend systems and data pipelines that process data at scale with low latency. My stack spans Python, Spark, RabbitMQ, Airflow, Docker, and modern API frameworks.
+      </p>
+      <p style="color:var(--text2); font-size:13px; line-height:2; margin-bottom:20px;">
+        My background in <span style="color:var(--text)">Electronics &amp; Communication Engineering</span> from NIT Silchar gives me a systems-level perspective that most engineers don't have — across distributed architecture and ML deployment.
+      </p>
+      <p style="color:var(--text2); font-size:13px; line-height:2;">
+        Actively exploring <span style="color:var(--green)">ML, Generative AI, and Agentic AI</span> — built Travel Copilot (MCP orchestration) and FloodSafeGIS (SIH 2023 Winner). Open to roles at the intersection of data, ML, and intelligent systems.
+      </p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text2);">Current role</span>
+        <span style="font-size:12px; color:var(--green);">Assoc. Data Engineer @ Lowe's</span>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text2);">Education</span>
+        <span style="font-size:12px; color:var(--text);">B.Tech ECE · NIT Silchar · 8.4 GPA</span>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text2);">Location</span>
+        <span style="font-size:12px; color:var(--text);">Bengaluru, India</span>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text2);">Open to</span>
+        <span style="font-size:12px; color:var(--green);">ML · Gen AI · Data Eng roles</span>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text2);">Interests</span>
+        <span style="font-size:12px; color:var(--text);">Psychology · Astronomy 🔭</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header fade-up">
+    <span class="section-num">02.</span>
+    <h2 class="section-title">experience</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-meta">
+        <span class="timeline-date">June 2024 — present</span>
+        <span class="timeline-company">// Lowe's India · Bengaluru</span>
+      </div>
+      <div class="timeline-role">Associate Data Engineer</div>
+      <p class="timeline-desc">
+        Designing and optimizing distributed backend systems that handle large-scale data processing 
+        with low latency. Integrated Spark and RabbitMQ for scalable async workloads. 
+        Working across backend services, API layers, and data pipeline infrastructure.
+      </p>
+      <div class="tag-row">
+        <span class="tag cyan">Python</span>
+        <span class="tag cyan">Apache Spark</span>
+        <span class="tag cyan">RabbitMQ</span>
+        <span class="tag cyan">Apache Airflow</span>
+        <span class="tag">Docker</span>
+        <span class="tag">Kubernetes</span>
+        <span class="tag">Flask</span>
+        <span class="tag">MongoDB</span>
+        <span class="tag">React</span>
+        <span class="tag">ECS</span>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot dim"></div>
+      <div class="timeline-meta">
+        <span class="timeline-date">Jan 2024 — May 2024</span>
+        <span class="timeline-company">// Lowe's India · Intern</span>
+      </div>
+      <div class="timeline-role">Software Engineering Intern</div>
+      <p class="timeline-desc">
+        Built full-stack features across Python/Flask backend services and React frontends. 
+        Worked with production SQL and MongoDB databases as part of the data engineering team.
+      </p>
+      <div class="tag-row">
+        <span class="tag">Python</span>
+        <span class="tag">Flask</span>
+        <span class="tag">React</span>
+        <span class="tag">SQL</span>
+        <span class="tag">MongoDB</span>
+        <span class="tag">Linux</span>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot dim"></div>
+      <div class="timeline-meta">
+        <span class="timeline-date">June 2022 — July 2022</span>
+        <span class="timeline-company">// Knackit · Remote</span>
+      </div>
+      <div class="timeline-role">UX Design Intern</div>
+      <p class="timeline-desc">
+        Designed accessible, user-centred interfaces through wireframes, prototypes, and user flows. 
+        Advocated for real user needs and aligned designs with accessibility standards.
+      </p>
+      <div class="tag-row">
+        <span class="tag">Figma</span>
+        <span class="tag">UX Research</span>
+        <span class="tag">Prototyping</span>
+        <span class="tag">Wireframing</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header fade-up">
+    <span class="section-num">03.</span>
+    <h2 class="section-title">skills</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="skills-grid">
+    <div class="skill-card fade-up">
+      <div class="skill-card-icon">⚙️</div>
+      <div class="skill-card-title">Languages & Backend</div>
+      <div class="skill-list">
+        <span class="skill-pill">Python</span>
+        <span class="skill-pill">SQL</span>
+        <span class="skill-pill">C++</span>
+        <span class="skill-pill">Flask</span>
+        <span class="skill-pill">FastAPI</span>
+        <span class="skill-pill">REST APIs</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-up">
+      <div class="skill-card-icon">🔁</div>
+      <div class="skill-card-title">Data & Distributed Systems</div>
+      <div class="skill-list">
+        <span class="skill-pill">Apache Spark</span>
+        <span class="skill-pill">RabbitMQ</span>
+        <span class="skill-pill">ETL Pipelines</span>
+        <span class="skill-pill">Distributed Systems</span>
+        <span class="skill-pill">Celery</span>
+        <span class="skill-pill">MySQL</span>
+        <span class="skill-pill">MongoDB</span>
+        <span class="skill-pill">FAISS</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-up">
+      <div class="skill-card-icon">📊</div>
+      <div class="skill-card-title">Data Science</div>
+      <div class="skill-list">
+        <span class="skill-pill">Pandas</span>
+        <span class="skill-pill">NumPy</span>
+        <span class="skill-pill">Matplotlib</span>
+        <span class="skill-pill">Seaborn</span>
+        <span class="skill-pill">Statistical Modeling</span>
+        <span class="skill-pill">Predictive Analytics</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-up">
+      <div class="skill-card-icon">🔧</div>
+      <div class="skill-card-title">Orchestration & DevOps</div>
+      <div class="skill-list">
+        <span class="skill-pill">Apache Airflow</span>
+        <span class="skill-pill">Control-M</span>
+        <span class="skill-pill">Docker</span>
+        <span class="skill-pill">Kubernetes</span>
+        <span class="skill-pill">ECS</span>
+        <span class="skill-pill">Git</span>
+        <span class="skill-pill">CI/CD</span>
+        <span class="skill-pill">Agile</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-up" style="border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.02);">
+      <div class="skill-card-icon">🤖</div>
+      <div class="skill-card-title" style="color: var(--green);">ML / AI</div>
+      <div class="skill-list">
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">Gen AI</span>
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">Agentic AI</span>
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">LLMs</span>
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">LangChain</span>
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">RAG Pipelines</span>
+        <span class="skill-pill" style="border-color:rgba(0,255,136,0.3); color:var(--green);">MCP</span>
+        <span class="skill-pill">Scikit-learn</span>
+        <span class="skill-pill">MLOps</span>
+        <span class="skill-pill">Feature Engineering</span>
+        <span class="skill-pill">PyTorch</span>
+        <span class="skill-pill">Embeddings</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-up">
+      <div class="skill-card-icon">🧠</div>
+      <div class="skill-card-title">CS Fundamentals</div>
+      <div class="skill-list">
+        <span class="skill-pill">DSA</span>
+        <span class="skill-pill">OOP</span>
+        <span class="skill-pill">OS</span>
+        <span class="skill-pill">System Design</span>
+        <span class="skill-pill">Linux</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section id="awards">
+  <div class="section-header fade-up">
+    <span class="section-num">04.</span>
+    <h2 class="section-title">awards & recognition</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="awards-grid">
+    <div class="award-card fade-up">
+      <div class="award-year">2023</div>
+      <div class="award-icon">🏆</div>
+      <div class="award-title">Smart India Hackathon Winner</div>
+      <div class="award-org">Government of India · National Level</div>
+    </div>
+    <div class="award-card fade-up">
+      <div class="award-year">2023</div>
+      <div class="award-icon">🌏</div>
+      <div class="award-title">McKinsey Next Gen Woman Leader</div>
+      <div class="award-org">McKinsey & Company · APAC</div>
+    </div>
+    <div class="award-card fade-up">
+      <div class="award-year">2022</div>
+      <div class="award-icon">🥇</div>
+      <div class="award-title">AIR 1 · Visual Design Challenge</div>
+      <div class="award-org">Eminence Robotics · All India</div>
+    </div>
+    <div class="award-card fade-up">
+      <div class="award-year">2022</div>
+      <div class="award-icon">💡</div>
+      <div class="award-title">Microsoft Engage Mentee</div>
+      <div class="award-org">Microsoft · Selected Programme</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="border-top: 1px solid var(--border); max-width:100%; padding: 100px 40px;">
+  <div style="max-width:1000px; margin:0 auto;">
+    <div class="contact-inner">
+      <div class="contact-text fade-up">
+        <h2>let's<br><span class="green">connect.</span></h2>
+        <p>
+          I'm always open to conversations about data infrastructure, 
+          distributed systems, and AI engineering.<br><br>
+          Whether it's a collaboration, a role, or just a good technical discussion — reach out.
+        </p>
+        <div class="contact-links">
+          <a href="/cdn-cgi/l/email-protection#7d1914041c161c0f101c161c0f4b4b453d1a101c1411531e1210" class="contact-link">
+            <span class="contact-link-icon">✉</span>
+            <div>
+              <span class="contact-link-label">email</span>
+              <span class="__cf_email__" data-cfemail="f1959888909a90839c909a9083c7c7c9b1969c90989ddf929e9c">[email&#160;protected]</span>
+            </div>
+          </a>
+          <a href="https://linkedin.com/in/diya-karmakar" target="_blank" class="contact-link">
+            <span class="contact-link-icon">in</span>
+            <div>
+              <span class="contact-link-label">linkedin</span>
+              /in/diya-karmakar
+            </div>
+          </a>
+          <a href="https://github.com/diyakarmakar779" target="_blank" class="contact-link">
+            <span class="contact-link-icon">⌥</span>
+            <div>
+              <span class="contact-link-label">github</span>
+              diyakarmakar779
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="terminal fade-up">
+        <div class="terminal-bar">
+          <div class="terminal-dot r"></div>
+          <div class="terminal-dot y"></div>
+          <div class="terminal-dot g"></div>
+          <span class="terminal-title">diya@portfolio ~ zsh</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">❯ </span><span class="t-cmd">cat about.json</span></div>
+          <div class="t-dim">{</div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"name"</span><span class="t-dim">:</span> <span class="t-amber">"Diya Karmakar"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"role"</span><span class="t-dim">:</span> <span class="t-amber">"Data Engineer · ML · Gen AI"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"company"</span><span class="t-dim">:</span> <span class="t-amber">"Lowe's India"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"location"</span><span class="t-dim">:</span> <span class="t-amber">"Bengaluru, IN"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"interests"</span><span class="t-dim">: [</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"data pipelines"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"distributed systems"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"generative AI"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"agentic AI systems"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"ML infra"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"psychology books"</span><span class="t-dim">,</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-amber">"astronomy 🔭"</span></div>
+          <div>&nbsp;&nbsp;<span class="t-dim">],</span></div>
+          <div>&nbsp;&nbsp;<span class="t-cyan">"open_to"</span><span class="t-dim">:</span> <span class="t-amber">"ML · Gen AI · Data Eng roles"</span></div>
+          <div class="t-dim">}</div>
+          <br>
+          <div><span class="t-prompt">❯ </span><span class="t-cmd">echo $STATUS</span></div>
+          <div class="t-out"><span style="color:var(--green)">●</span> actively building · always learning</div>
+          <br>
+          <div><span class="t-prompt">❯ </span><span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 <span>Diya Karmakar</span> · built with intention</div>
+  <div>diyakarmakar779.github.io</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Intersection observer for fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Smooth active nav link
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sec
